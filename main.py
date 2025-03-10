@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 import sys
 from os.path import dirname, abspath
+from backend.utils import write_md_to_word
 
 # Create logs directory if it doesn't exist
 logs_dir = Path("logs")
@@ -37,6 +38,7 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from gpt_researcher import GPTResearcher
+from backend.server.server import app
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -75,6 +77,10 @@ async def research(request: dict):
     except Exception as e:
         # Return any errors that occurred during the research process
         return {"error": str(e)}
+
+        # Generate DOCX file
+        sanitized_filename = f"task_{int(time.time())}_{request.query[:50]}"
+        docx_path = await write_md_to_word(report, sanitized_filename)
 
 if __name__ == "__main__":
     import uvicorn
